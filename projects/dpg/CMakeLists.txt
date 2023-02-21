@@ -1,4 +1,4 @@
-set(src 
+set(src
   discontinuous_fe_constant.h
   discontinuous_scalar_reference_finite_element.h
   dpg.h
@@ -20,7 +20,7 @@ set(src
   trace_scalar_reference_finite_element.h)
 
 add_library(projects.dpg ${src})
-target_link_libraries(projects.dpg  
+target_link_libraries(projects.dpg
   PUBLIC Eigen3::Eigen Boost::program_options
   lf.mesh
   lf.mesh.utils
@@ -36,12 +36,12 @@ target_link_libraries(projects.dpg
 set_target_properties(projects.dpg PROPERTIES FOLDER "projects/dpg")
 
 target_include_directories(projects.dpg PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-target_compile_features(projects.dpg PUBLIC cxx_std_17)
+target_compile_features(projects.dpg PUBLIC cxx_std_20)
 
 
 #add tests
 if (LF_ENABLE_TESTING)
-  add_subdirectory(test) 
+  add_subdirectory(test)
 endif()
 
 #add convergence studies

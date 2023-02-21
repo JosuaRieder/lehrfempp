@@ -9,7 +9,7 @@ target_link_libraries(projects.ipdg_stokes.post_processing PUBLIC Eigen3::Eigen 
 set_target_properties(projects.ipdg_stokes.post_processing PROPERTIES FOLDER "projects/ipdg_stokes")
 target_include_directories(projects.ipdg_stokes.post_processing PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
-target_compile_features(projects.ipdg_stokes.post_processing PUBLIC cxx_std_17)
+target_compile_features(projects.ipdg_stokes.post_processing PUBLIC cxx_std_20)
 
 # Include the tests
 add_subdirectory(test)

@@ -1,4 +1,4 @@
-set(sources				
+set(sources
     fe_point.h
     fe_tools.h
     fe_tools.cc
@@ -20,7 +20,7 @@ lf_add_library(lf.fe ${sources})
 target_link_libraries(lf.fe PUBLIC
   Eigen3::Eigen lf.mesh lf.base lf.geometry
   lf.mesh.utils lf.assemble lf.quad)
-target_compile_features(lf.fe PUBLIC cxx_std_17)
+target_compile_features(lf.fe PUBLIC cxx_std_20)
 set_target_properties(lf.fe PROPERTIES FOLDER "lib")
 
 if(LF_ENABLE_TESTING)

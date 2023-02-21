@@ -9,10 +9,4 @@ target_link_libraries(experiments.efficiency.runtime_test
 
 set_target_properties(experiments.efficiency.runtime_test PROPERTIES FOLDER "experiments")
 
-target_compile_features(experiments.efficiency.runtime_test PUBLIC cxx_std_17)
-
-  
-    
-
-  
-
+target_compile_features(experiments.efficiency.runtime_test PUBLIC cxx_std_20)

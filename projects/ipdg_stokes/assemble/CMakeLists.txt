@@ -14,7 +14,7 @@ target_link_libraries(projects.ipdg_stokes.assemble PUBLIC Eigen3::Eigen lf.base
 set_target_properties(projects.ipdg_stokes.assemble PROPERTIES FOLDER "projects/ipdg_stokes")
 target_include_directories(projects.ipdg_stokes.assemble PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
-target_compile_features(projects.ipdg_stokes.assemble PUBLIC cxx_std_17)
+target_compile_features(projects.ipdg_stokes.assemble PUBLIC cxx_std_20)
 
 
 # Include the tests

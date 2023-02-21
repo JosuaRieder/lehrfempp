@@ -83,11 +83,11 @@ target_link_libraries(projects.dpg.convergence_studies.convergence_study5
   )
 
 
-target_compile_features(projects.dpg.convergence_studies.convergence_study1 PUBLIC cxx_std_17)
-target_compile_features(projects.dpg.convergence_studies.convergence_study2 PUBLIC cxx_std_17)
-target_compile_features(projects.dpg.convergence_studies.convergence_study3 PUBLIC cxx_std_17)
-target_compile_features(projects.dpg.convergence_studies.convergence_study4 PUBLIC cxx_std_17)
-target_compile_features(projects.dpg.convergence_studies.convergence_study5 PUBLIC cxx_std_17)
+target_compile_features(projects.dpg.convergence_studies.convergence_study1 PUBLIC cxx_std_20)
+target_compile_features(projects.dpg.convergence_studies.convergence_study2 PUBLIC cxx_std_20)
+target_compile_features(projects.dpg.convergence_studies.convergence_study3 PUBLIC cxx_std_20)
+target_compile_features(projects.dpg.convergence_studies.convergence_study4 PUBLIC cxx_std_20)
+target_compile_features(projects.dpg.convergence_studies.convergence_study5 PUBLIC cxx_std_20)
 
 if(WIN32)
     target_compile_options(projects.dpg.convergence_studies.convergence_study1 PRIVATE /bigobj)
