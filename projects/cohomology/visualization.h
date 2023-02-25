@@ -161,12 +161,12 @@ void exportEdgeVectorsObj(std::ostream& stream, lf::mesh::Mesh const& lfMesh, In
 	const std::size_t vertexCount = lfMesh.NumEntities(2);
 	for(EdgeVector const& edgeVector : edgeVectors)
 	{
-		for(std::size_t i = 0; i < edgeVector.size(); ++i)
+		for(std::size_t e = 0; e < edgeVector.size(); ++e)
 		{
-			const int edgeCoeff = edgeVector[i];
+			const int edgeCoeff = edgeVector[e];
 			if(edgeCoeff != 0)
 			{
-				const auto endpoints = lfMesh.EntityByIndex(1, i)->SubEntities(1);
+				const auto endpoints = lfMesh.EntityByIndex(1, e)->SubEntities(1);
 				if(endpoints.size() != 2)
 					throw std::runtime_error("exportEdgeVectorsObj: invalid number of endpoints: expected 2, found " + std::to_string(endpoints.size()));
 				unsigned from = lfMesh.Index(*endpoints[0]);

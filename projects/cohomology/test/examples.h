@@ -340,8 +340,16 @@ void addQuadrilateral(MeshFactory& meshFactory, Shape shape, QuadrilateralIndice
 }
 
 
-// Small cube with two magnetic ports.
-[[nodiscard]] std::pair<Mesh, std::shared_ptr<lf::mesh::Mesh>> getCubeExample()
+// Small cube without any ports.
+[[nodiscard]] std::pair<Mesh, std::shared_ptr<lf::mesh::Mesh>> getCubeExampleWithoutPorts()
+{
+	const auto lfMesh = generateCube(Shape::quads);
+	Mesh mesh(*lfMesh);
+	return { std::move(mesh), std::move(lfMesh) };
+}
+
+// Small cube with two (small) magnetic ports.
+[[nodiscard]] std::pair<Mesh, std::shared_ptr<lf::mesh::Mesh>> getCubeExampleWithTwoPorts()
 {
 	const auto lfMesh = generateCube(Shape::quads);
 	const auto portMap = [](unsigned f) -> PortInformation
@@ -484,6 +492,33 @@ void addQuadrilateral(MeshFactory& meshFactory, Shape shape, QuadrilateralIndice
 			return { electricPort, 0 };
 		else
 			return {};
+	};
+	Mesh mesh(*lfMesh, portMap);
+	return { std::move(mesh), std::move(lfMesh) };
+}
+
+// Handlebody with magnetic and electric ports on its side.
+[[nodiscard]] std::pair<Mesh, std::shared_ptr<lf::mesh::Mesh>> getHandlebodyExample(unsigned genus)
+{
+	const unsigned xMax = 2 + 2 * genus, yMax = 4, zMax = 2;
+	const unsigned xExtremalSides = 2 * (yMax - 1);
+	const unsigned yExtremalSides = 2 * (xMax - 1);
+
+	const auto lfMesh = generate3Handlebody(genus, Shape::quads);
+	const auto portMap = [=](unsigned f) -> PortInformation
+	{
+		if(f >= xExtremalSides)
+		{
+			f -= xExtremalSides;
+			if(f < yExtremalSides)
+			{
+				const unsigned quotient = f / 4;
+				const unsigned remainder = f % 4;
+				if(remainder < 2)
+					return { remainder ? magneticPort : electricPort, static_cast<int>(quotient) };
+			}
+		}
+		return {};
 	};
 	Mesh mesh(*lfMesh, portMap);
 	return { std::move(mesh), std::move(lfMesh) };

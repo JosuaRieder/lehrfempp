@@ -9,8 +9,8 @@
 #ifndef COHOMOLOGY_UTILITY_H_INCLUDED
 #define COHOMOLOGY_UTILITY_H_INCLUDED
 
-#include <Eigen/Dense>
 #include <lf/mesh/mesh.h>
+#include <Eigen/Dense>
 
 #include <type_traits>
 #include <functional>

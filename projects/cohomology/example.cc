@@ -39,11 +39,11 @@ int main()
 		visualization::exportEdgeVectorsObj(magneticPortCyclesObj, *lfMesh, magneticPortCycles);
 
 		std::vector<Walk> excludedEdges;
-		for(EdgeIndex::Index i = 0; i < mesh.edgeConnectivity.size(); ++i)
+		for(EdgeIndex::Index e = 0; e < mesh.edgeConnectivity.size(); ++e)
 		{
-			if(mesh.isExcludedEdge(i))
+			if(mesh.isExcludedEdge(e))
 			{
-				auto const& vertices = mesh.edgeConnectivity[i].vertices;
+				auto const& vertices = mesh.edgeConnectivity[e].vertices;
 				Walk walk(&mesh);
 				walk.vertices.assign(vertices.begin(), vertices.end());
 				excludedEdges.emplace_back(std::move(walk));

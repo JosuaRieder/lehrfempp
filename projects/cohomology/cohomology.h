@@ -312,7 +312,7 @@ enum class RelativeFaceOrientation
 	vertexDisjoint, //!< The two faces don't share any vertices.
 	edgeDisjoint, //!< The two faces share a vertex but no edges.
 	inAgreement, //!< The two faces share an edge and are in agreement with regard to the orientation induced on the shared edge.
-	inDisgreement, //!< The two faces share an edge and are in disagreement with regard to the orientation induced on the shared edge.
+	inDisagreement, //!< The two faces share an edge and are in disagreement with regard to the orientation induced on the shared edge.
 };
 
 /**
@@ -403,26 +403,26 @@ struct FaceVertices
 		const std::size_t otherPrev = (otherFirst + other.vertexIndices.size() - 1) % other.vertexIndices.size();
 		const std::size_t otherNext = (otherFirst + 1) % other.vertexIndices.size();
 		if(vertexIndices[thisNext] == other.vertexIndices[otherNext] || vertexIndices[thisPrev] == other.vertexIndices[otherPrev])
-			return RelativeFaceOrientation::inDisgreement;
-		if(vertexIndices[thisNext] == other.vertexIndices[otherPrev] || vertexIndices[thisPrev] == other.vertexIndices[otherNext])
 			return RelativeFaceOrientation::inAgreement;
+		if(vertexIndices[thisNext] == other.vertexIndices[otherPrev] || vertexIndices[thisPrev] == other.vertexIndices[otherNext])
+			return RelativeFaceOrientation::inDisagreement;
 		return RelativeFaceOrientation::edgeDisjoint;
 	}
 
 	/**
-	 * @brief For two faces that share an edge, this function reverses `other`'s vertices iff the two faces are in disagreement with respect to the shared edge (see `RelativeFaceOrientation::inDisgreement`).
-	 * After this function has been called, `relativeOrientation(other)` will always return `RelativeFaceOrientation::inAgreement`.
-	 * @see RelativeFaceOrientation::inDisgreement
+	 * @brief For two faces that share an edge, this function reverses `other`'s vertices iff the two faces are in agreement with respect to the shared edge (see `RelativeFaceOrientation::inAgreement`).
+	 * After this function has been called, `relativeOrientation(other)` will always return `RelativeFaceOrientation::inDisagreement`.
+	 * @see RelativeFaceOrientation::inAgreement
 	 * @param other The other face's vertex sequence.
 	 * @return Whether the vertices of `other` have been reversed.
 	 */
-	bool orientAgreeably(FaceVertices& other) const noexcept
+	bool orientDisagreeably(FaceVertices& other) const noexcept
 	{
 		const RelativeFaceOrientation relative = relativeOrientation(other);
-		assert(relative == RelativeFaceOrientation::inAgreement || relative == RelativeFaceOrientation::inDisgreement);
-		if(relative == RelativeFaceOrientation::inDisgreement)
+		assert(relative == RelativeFaceOrientation::inAgreement || relative == RelativeFaceOrientation::inDisagreement);
+		if(relative == RelativeFaceOrientation::inAgreement)
 			std::reverse(other.vertexIndices.begin(), other.vertexIndices.end());
-		return relative == RelativeFaceOrientation::inDisgreement;
+		return relative == RelativeFaceOrientation::inAgreement;
 	}
 
 	friend constexpr bool operator==(FaceVertices const&, FaceVertices const&) = default;
@@ -560,7 +560,7 @@ struct Mesh
 	/**
 	 * @brief Tries to establish a topological orientation on the mesh by selectively reversing the order of vertices of the faces.
 	 * @return `true` iff either the mesh has already been oriented or the mesh has successfully been oriented.
-	 * @see FaceVertices::orientAgreeably
+	 * @see FaceVertices::orientDisagreeably
 	 */
 	bool tryOrient()
 	{
@@ -599,7 +599,7 @@ struct Mesh
 
 				if(index != predIndex) // see above .emplace(start, start)
 				{
-					predVertex.orientAgreeably(vertex);
+					predVertex.orientDisagreeably(vertex);
 					nowOriented(index);
 				}
 
@@ -614,7 +614,7 @@ struct Mesh
 					}
 					else if(oriented[iter->to])
 					{
-						if(vertex.relativeOrientation(faceGraph.V[iter->to]) != RelativeFaceOrientation::inAgreement)
+						if(vertex.relativeOrientation(faceGraph.V[iter->to]) != RelativeFaceOrientation::inDisagreement)
 							return false;
 					}
 			}
@@ -711,9 +711,9 @@ struct Mesh
 		}
 
 		// Construct the face graph
-		for(EdgeIndex::Index i = 0; i < edgeConnectivity.size(); ++i)
-			if(edgeConnectivity[i].hasTwoFaces())
-				faceGraph.E.emplace(edgeConnectivity[i].faces[0], edgeConnectivity[i].faces[1], i);
+		for(EdgeIndex::Index e = 0; e < edgeConnectivity.size(); ++e)
+			if(edgeConnectivity[e].hasTwoFaces())
+				faceGraph.E.emplace(edgeConnectivity[e].faces[0], edgeConnectivity[e].faces[1], e);
 
 		// Calculate an orientation of the mesh
 		if(!tryOrient())
@@ -765,11 +765,11 @@ struct Mesh
 	 * @return `std::nullopt` if the vertex does not belong to a port, the type of the port it belongs to otherwise.
 	 * @see PortType
 	 */
-	[[nodiscard]] std::optional<PortType> isPortVertex(quiver::vertex_index_t vertexIndex) const noexcept
+	[[nodiscard]] std::optional<PortInformation> isPortVertex(quiver::vertex_index_t vertexIndex) const noexcept
 	{
 		auto const& vertex = vertexGraph.V[vertexIndex];
 		if(vertex.isAffiliated())
-			return vertex.portType;
+			return static_cast<PortInformation const&>(vertex);
 		else
 			return {};
 	}
@@ -779,15 +779,16 @@ struct Mesh
 	 * @return `std::nullopt` if the vertex does not belong to a port or is not located on the port's boundary, the type of the port it belongs to otherwise.
 	 * @see PortType
 	 */
-	[[nodiscard]] std::optional<PortType> isPortBoundaryVertex(quiver::vertex_index_t vertexIndex) const noexcept
+	[[nodiscard]] std::optional<PortInformation> isPortBoundaryVertex(quiver::vertex_index_t vertexIndex) const noexcept
 	{
 		auto const& vertex = vertexGraph.V[vertexIndex];
+		auto const& pi = static_cast<PortInformation const&>(vertex);
 		if(vertex.isAffiliated())
 		{
 			using std::begin, std::end;
 			for(auto const& outEdge : vertex.out_edges)
-				if(static_cast<PortInformation const&>(vertex) != vertexGraph.V[outEdge.to])
-					return vertex.portType;
+				if(pi != vertexGraph.V[outEdge.to])
+					return pi;
 		}
 		return {};
 	}
@@ -797,9 +798,9 @@ struct Mesh
 	 * @return `std::nullopt` if the vertex is not in the interior of a port, the type of the port it belongs to otherwise.
 	 * @see PortType
 	 */
-	[[nodiscard]] std::optional<PortType> isPortInteriorVertex(quiver::vertex_index_t vertexIndex) const noexcept
+	[[nodiscard]] std::optional<PortInformation> isPortInteriorVertex(quiver::vertex_index_t vertexIndex) const noexcept
 	{
-		if(std::optional<PortType> result = isPortVertex(vertexIndex))
+		if(std::optional<PortInformation> result = isPortVertex(vertexIndex))
 			if(!isPortBoundaryVertex(vertexIndex))
 				return result;
 		return {};
@@ -814,7 +815,7 @@ struct Mesh
 	[[nodiscard]] bool isExcludedVertex(quiver::vertex_index_t vertexIndex) const noexcept
 	{
 		const auto isPort = isPortVertex(vertexIndex);
-		return isPort && (*isPort == electricPort || isPortInteriorVertex(vertexIndex));
+		return isPort && (isPort->portType == electricPort || isPortInteriorVertex(vertexIndex));
 	}
 
 	/**
@@ -1082,7 +1083,9 @@ class Walk
 			assert(isDereferenceable());
 			const quiver::vertex_index_t from = walk->vertices[i];
 			const quiver::vertex_index_t to = walk->vertices[i + 1];
-			return { from, to, *walk->mesh->vertexGraph.E(from, to) };
+			const auto outEdge = walk->mesh->vertexGraph.E(from, to);
+			assert(outEdge != nullptr);
+			return { from, to, *outEdge };
 		}
 
 		ConstEdgeIterator& operator++() noexcept
@@ -1323,7 +1326,7 @@ public:
 		}
 	}
 
-	friend constexpr bool operator==(Walk const&, Walk const&) noexcept = default;
+	friend bool operator==(Walk const&, Walk const&) noexcept = default;
 };
 
 /**
@@ -1362,9 +1365,9 @@ std::ostream& operator<<(std::ostream& stream, Walk const& walk)
 		};
 		quiver::vertex_index_t last = walk.vertices[0];
 		vertexPrinter(last);
-		for(std::size_t i = 1; i < walk.vertices.size(); ++i)
+		for(std::size_t v = 1; v < walk.vertices.size(); ++v)
 		{
-			const quiver::vertex_index_t current = walk.vertices[i];
+			const quiver::vertex_index_t current = walk.vertices[v];
 			edgePrinter(last, current);
 			vertexPrinter(current);
 			last = current;
@@ -2360,13 +2363,13 @@ void pushLoopsOutOfPorts(Mesh const& mesh, Walk& walk)
 	const auto getBoundaryOrientation = [&mesh](EdgeVector const& edgeVector) -> int
 	{
 		// Find the first edge that appears in this path.
-		for(int i = 0; i < edgeVector.size(); ++i)
+		for(quiver::vertex_index_t e = 0; e < edgeVector.size(); ++e)
 		{
-			const int edgeDirection = edgeVector[i];
+			const int edgeDirection = edgeVector[e];
 			if(edgeDirection != 0)
 			{
 				// Find the port face that this edge touches.
-				const EdgeInformation& edgeInformation = mesh.edgeConnectivity[i];
+				const EdgeInformation& edgeInformation = mesh.edgeConnectivity[e];
 				const auto& faceIndices = edgeInformation.faces;
 				assert(mesh.faceGraph.V[faceIndices[0]].isAffiliated()
 					 ^ mesh.faceGraph.V[faceIndices[1]].isAffiliated());
