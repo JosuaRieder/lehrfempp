@@ -1069,10 +1069,10 @@ class Walk
 		using reference = value_type;
 		using iterator_category = std::random_access_iterator_tag;
 
-		[[nodiscard]] constexpr ConstEdgeIterator() noexcept
+		[[nodiscard]] ConstEdgeIterator() noexcept
 		{
 		}
-		[[nodiscard]] constexpr ConstEdgeIterator(Walk const* walk, std::ptrdiff_t i) noexcept
+		[[nodiscard]] ConstEdgeIterator(Walk const* walk, std::ptrdiff_t i) noexcept
 			: walk(walk), i(i)
 		{
 			assert(isValid());
@@ -1153,27 +1153,27 @@ class Walk
 			return *(*this + n);
 		}
 
-		[[nodiscard]] constexpr bool operator==(ConstEdgeIterator const& rhs) const noexcept
+		[[nodiscard]] bool operator==(ConstEdgeIterator const& rhs) const noexcept
 		{
 			return walk == rhs.walk && i == rhs.i;
 		}
-		[[nodiscard]] constexpr bool operator!=(ConstEdgeIterator const& rhs) const noexcept
+		[[nodiscard]] bool operator!=(ConstEdgeIterator const& rhs) const noexcept
 		{
 			return !operator==(rhs);
 		}
-		[[nodiscard]] constexpr bool operator<(ConstEdgeIterator const& rhs) const noexcept
+		[[nodiscard]] bool operator<(ConstEdgeIterator const& rhs) const noexcept
 		{
 			return walk == rhs.walk && i < rhs.i;
 		}
-		[[nodiscard]] constexpr bool operator<=(ConstEdgeIterator const& rhs) const noexcept
+		[[nodiscard]] bool operator<=(ConstEdgeIterator const& rhs) const noexcept
 		{
 			return walk == rhs.walk && i <= rhs.i;
 		}
-		[[nodiscard]] constexpr bool operator>(ConstEdgeIterator const& rhs) const noexcept
+		[[nodiscard]] bool operator>(ConstEdgeIterator const& rhs) const noexcept
 		{
 			return walk == rhs.walk && i > rhs.i;
 		}
-		[[nodiscard]] constexpr bool operator>=(ConstEdgeIterator const& rhs) const noexcept
+		[[nodiscard]] bool operator>=(ConstEdgeIterator const& rhs) const noexcept
 		{
 			return walk == rhs.walk && i >= rhs.i;
 		}
